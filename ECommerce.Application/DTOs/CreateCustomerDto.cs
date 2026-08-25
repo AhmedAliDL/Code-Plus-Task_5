@@ -1,4 +1,4 @@
-namespace ECommerce.API.DTOs;
+namespace ECommerce.Application.DTOs;
 
 public class CreateCustomerDto
 {

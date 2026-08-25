@@ -1,4 +1,4 @@
-using ECommerce.DAL.Entities;
+using ECommerce.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace ECommerce.DAL.Context;
