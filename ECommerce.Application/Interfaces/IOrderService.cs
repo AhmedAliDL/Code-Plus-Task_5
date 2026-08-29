@@ -4,9 +4,7 @@ namespace ECommerce.Application.Interfaces
 {
     public interface IOrderService
     {
-        Task<Order?> GetOrderById(int id);
-        Task<List<Order>?> GetCustomerOrders(int customerId);
-        Task CancelOrder(int id);
+        Order CreateOrder(int customerId, decimal subtotal, decimal discount, decimal tax, decimal shipping, decimal netAmount, List<OrderItem> items);
 
     }
 }

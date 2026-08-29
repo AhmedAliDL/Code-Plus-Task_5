@@ -9,5 +9,6 @@ namespace ECommerce.Application.Interfaces
         Task UpgradeToVip(Customer customer);
         Task<bool> EmailExists(string email);
         decimal GetTotalSpent(Customer customer);
+        Task<decimal> ApplyVipDiscount(decimal subtotal, int customerId);
     }
 }

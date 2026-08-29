@@ -1,38 +1,33 @@
-using ECommerce.Application.DTOs;
-using ECommerce.Application.Interfaces;
+using ECommerce.Application.Customers.Commands.CreateCustomer;
+using ECommerce.Application.Customers.Commands.UpgradeToVip;
+using ECommerce.Application.Customers.Queries.GetById;
 using ECommerce.Domain.Entities;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerce.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class CustomersController : ControllerBase
+public class CustomersController(IMediator mediator) : BaseController(mediator)
 {
-
-    private readonly ICustomerService _customerService;
-    public CustomersController(ICustomerService customerService)
-    {
-        _customerService = customerService;
-    }
-
     [HttpGet("{id}")]
-    public async Task<ActionResult<Customer>> GetById(int id)
+    public async Task<ActionResult<Customer>> GetById(GetByIdQuery request)
     {
-        var customer = await _customerService.GetById(id);
+        Customer? customer = await _mediator.Send(request);
 
-        if (customer == null)
-            return NotFound($"Customer with ID {id} not found.");
+        if (customer is not null)
+            return NotFound($"Customer with ID {customer.Id} not found.");
 
         return Ok(customer);
     }
 
     [HttpPost]
-    public async Task<ActionResult<Customer>> Create([FromBody] CreateCustomerDto dto)
+    public async Task<ActionResult<Customer>> Create([FromBody] CreateCustomerCommand request)
     {
         try
         {
-            var customer = await _customerService.Create(dto);
+            var customer = await _mediator.Send(request);
             return CreatedAtAction(nameof(GetById), new { id = customer.Id }, customer);
         }
         catch (ArgumentException ex)
@@ -43,11 +38,11 @@ public class CustomersController : ControllerBase
     }
 
     [HttpPost("{id}/upgrade-vip")]
-    public async Task<IActionResult> UpgradeToVip(int id)
+    public async Task<IActionResult> UpgradeToVip(UpgradeToVipCommand request)
     {
         try
         {
-            await _customerService.UpgradeToVip(id);
+            await _mediator.Send(request);
             return Ok(new { message = "Customer upgraded to VIP successfully." });
         }
         catch (ArgumentException ex)

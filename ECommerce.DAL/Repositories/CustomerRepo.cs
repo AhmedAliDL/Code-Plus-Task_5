@@ -46,5 +46,14 @@ namespace ECommerce.DAL.Repositories
             customer.IsVip = true;
             await _context.SaveChangesAsync();
         }
+        public async Task<decimal> ApplyVipDiscount(decimal subtotal, int customerId)
+        {
+            Customer? customer = await GetById(customerId);
+
+            if (customer != null)
+                return Math.Round(subtotal * 0.15m, 2);
+            return 0;
+
+        }
     }
 }

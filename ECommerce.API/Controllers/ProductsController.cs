@@ -1,48 +1,38 @@
-using ECommerce.Application.DTOs;
-using ECommerce.Application.Interfaces;
+using ECommerce.Application.Products.Commands.CreateProduct;
+using ECommerce.Application.Products.Commands.DeleteProduct;
+using ECommerce.Application.Products.Commands.UpdateProduct;
+using ECommerce.Application.Products.Queries.GeById;
+using ECommerce.Application.Products.Queries.GetAllProducts;
 using ECommerce.Domain.Entities;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerce.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ProductsController : ControllerBase
+public class ProductsController(IMediator mediator) : BaseController(mediator)
 {
-    private readonly IProductService _productService;
-
-    public ProductsController(IProductService productService)
-    {
-        _productService = productService;
-    }
-
     [HttpGet]
-    public async Task<ActionResult<List<Product>>> GetAll()
+    public async Task<ActionResult<List<Product>>> GetAll(GetAllProductsQuery request)
     {
-        var products = await _productService.GetAllProducts();
-        if (products == null || !products.Any())
-        {
-            return NotFound("No products found.");
-        }
+        var products = await _mediator.Send(request);
         return Ok(products);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Product>> GetById(int id)
+    public async Task<ActionResult<Product>> GetById(GetByIdQuery request)
     {
-        var product = await _productService.GetProductById(id);
-        if (product == null)
-            return NotFound($"Product with ID {id} not found.");
-
+        var product = await _mediator.Send(request);
         return Ok(product);
     }
 
     [HttpPost]
-    public async Task<ActionResult<Product>> Create([FromBody] CreateProductDto dto)
+    public async Task<ActionResult<Product>> Create([FromBody] CreateProductCommand request)
     {
         try
         {
-            var product = await _productService.CreateProduct(dto);
+            var product = await _mediator.Send(request);
             return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
         }
         catch (ArgumentException ex)
@@ -57,16 +47,16 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] Product product)
+    public async Task<IActionResult> Update([FromBody] UpdateProductCommand request)
     {
         try
         {
-            await _productService.UpdateProduct(id, product);
+            await _mediator.Send(request);
             return NoContent();
         }
         catch (KeyNotFoundException)
         {
-            return NotFound($"Product with ID {id} not found.");
+            return NotFound($"Product with ID {request.id} not found.");
         }
         catch (ArgumentException ex)
         {
@@ -75,11 +65,11 @@ public class ProductsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(DeleteProductCommand request)
     {
         try
         {
-            await _productService.DeleteProduct(id);
+            await _mediator.Send(request);
             return NoContent();
         }
         catch (KeyNotFoundException ex)

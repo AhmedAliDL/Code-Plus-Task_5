@@ -1,71 +1,33 @@
-﻿using ECommerce.Application.DTOs;
-using ECommerce.Application.Interfaces;
-using ECommerce.Domain.Entities;
+﻿using ECommerce.Application.Interfaces;
+using ECommerce.Application.Orders.Commands.Checkout;
 
 namespace ECommerce.Application.Services
 {
-    internal class ProductService : IProductService
+    public class ProductService : IProductService
     {
         private readonly IProductRepo _productRepo;
+
         public ProductService(IProductRepo productRepo)
         {
             _productRepo = productRepo;
         }
-        public async Task<Product> CreateProduct(CreateProductDto dto)
+
+        public async Task<decimal> CalSubTotalOfProducts(List<OrderItemRequestDto> Items)
         {
-            if (dto.Price <= 0)
+            decimal subtotal = 0m;
+
+            foreach (var itemDto in Items)
             {
-                throw new ArgumentException("Product price must be greater than zero.");
+                var product = await _productRepo.GetProductById(itemDto.ProductId) ?? throw new Exception($"Product with ID {itemDto.ProductId} not found.");
+
+                if (product.StockQuantity < itemDto.Quantity)
+                {
+                    throw new Exception($"Insufficient stock for product '{product.Name}'. Available: {product.StockQuantity}, Requested: {itemDto.Quantity}");
+                }
+
+                subtotal += product.Price * itemDto.Quantity;
             }
-
-            if (dto.StockQuantity < 0)
-            {
-                throw new ArgumentException("Stock quantity cannot be negative.");
-            }
-            var skuExists = await _productRepo.SKUExists(dto.SKU);
-            if (skuExists)
-            {
-                throw new KeyNotFoundException($"Product with SKU '{dto.SKU}' already exists.");
-            }
-
-            var product = new Product
-            {
-                Name = dto.Name,
-                SKU = dto.SKU.ToUpper(),
-                Price = dto.Price,
-                StockQuantity = dto.StockQuantity
-            };
-            return await _productRepo.CreateProduct(product);
-        }
-
-        public async Task DeleteProduct(int id)
-        {
-            var product = await _productRepo.GetProductById(id) ?? throw new KeyNotFoundException($"Product with ID {id} not found.");
-            await _productRepo.DeleteProduct(product);
-        }
-
-        public Task<List<Product>?> GetAllProducts()
-        {
-            return _productRepo.GetAllProducts();
-        }
-
-        public Task<Product?> GetProductById(int id)
-        {
-            return _productRepo.GetProductById(id);
-        }
-
-        public async Task UpdateProduct(int id, Product product)
-        {
-            var existing = await _productRepo.GetProductById(id) ?? throw new KeyNotFoundException($"Product with ID {id} not found.");
-            if (product.Price <= 0)
-                throw new ArgumentException("Price must be positive.");
-
-            existing.Name = product.Name;
-            existing.SKU = product.SKU;
-            existing.Price = product.Price;
-            existing.StockQuantity = product.StockQuantity;
-
-            await _productRepo.UpdateProduct(existing);
+            return subtotal;
         }
     }
 }
