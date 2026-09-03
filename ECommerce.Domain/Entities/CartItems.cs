@@ -9,9 +9,5 @@ public class CartItems
 
     public ShoppingCart ShoppingCart { get; set; }
 
-    public Product Product
-    {
-        get; set;
-
-    }
+    public Product Product { get; set; }
 }
