@@ -4,10 +4,12 @@ using ECommerce.Application.Events;
 using ECommerce.Application.Interfaces;
 using ECommerce.DAL.BackgroundServices;
 using ECommerce.DAL.Context;
+using ECommerce.DAL.Service;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +42,11 @@ builder.Services.AddSingleton<
 
 builder.Services.AddHostedService<
     SendEmailWhenAddingItemsToCartService>();
+builder.Services.AddSingleton<IConnectionMultiplexer>(
+    ConnectionMultiplexer.Connect(
+        builder.Configuration.GetConnectionString("Redis")!
+    ));
+builder.Services.AddScoped<IProductViewService, ProductViewService>();
 
 var app = builder.Build();
 

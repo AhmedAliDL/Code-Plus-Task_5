@@ -17,6 +17,7 @@ public class AppDbContext : DbContext
     public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<CartItems> CartItems => Set<CartItems>();
     public DbSet<ShoppingCart> ShoppingCart => Set<ShoppingCart>();
+    public DbSet<ProductDailyView> ProductDailyViews => Set<ProductDailyView>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

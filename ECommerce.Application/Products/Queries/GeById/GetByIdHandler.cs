@@ -7,14 +7,17 @@ namespace ECommerce.Application.Products.Queries.GeById
     public class GetByIdHandler : IRequestHandler<GetByIdQuery, Product?>
     {
         private readonly IProductRepo _productRepo;
-        public GetByIdHandler(IProductRepo productRepo)
+        private readonly IProductViewService _productViewService;
+        public GetByIdHandler(IProductRepo productRepo, IProductViewService productViewService)
         {
             _productRepo = productRepo;
+            _productViewService = productViewService;
         }
-        public Task<Product?> Handle(GetByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Product?> Handle(GetByIdQuery request, CancellationToken cancellationToken)
         {
-            return _productRepo.GetProductById(request.id);
+            await _productViewService.TrackViewAsync(request.id, cancellationToken);
+            return await _productRepo.GetProductById(request.id);
         }
     }
-   
+
 }
