@@ -18,6 +18,8 @@ public class AppDbContext : DbContext
     public DbSet<CartItems> CartItems => Set<CartItems>();
     public DbSet<ShoppingCart> ShoppingCart => Set<ShoppingCart>();
     public DbSet<ProductDailyView> ProductDailyViews => Set<ProductDailyView>();
+    public DbSet<Conversation> Conversations => Set<Conversation>();
+    public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

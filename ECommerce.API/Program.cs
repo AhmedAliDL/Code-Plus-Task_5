@@ -1,9 +1,12 @@
+using ECommerce.API.Hubs;
+using ECommerce.API.SignalR;
 using ECommerce.Application;
 using ECommerce.Application.Behavior;
 using ECommerce.Application.Events;
 using ECommerce.Application.Interfaces;
 using ECommerce.DAL.BackgroundServices;
 using ECommerce.DAL.Context;
+using ECommerce.DAL.Repositories;
 using ECommerce.DAL.Service;
 using FluentValidation;
 using MediatR;
@@ -47,7 +50,16 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(
         builder.Configuration.GetConnectionString("Redis")!
     ));
 builder.Services.AddScoped<IProductViewService, ProductViewService>();
+builder.Services.AddSignalR();
+builder.Services.AddScoped<IChatNotifier, ChatNotifier>();
+builder.Services.AddScoped<IProductRepo, ProductRepo>();
+builder.Services.AddScoped<IOrderRepo, OrderRepo>();
+builder.Services.AddScoped<ICustomerRepo, CustomerRepo>();
 
+builder.Services.AddScoped<IOrderItemsService, OrderItemsService>();
+
+builder.Services.AddScoped<IConversationRepo, ConversationRepo>();
+builder.Services.AddScoped<IChatMessageRepo, ChatMessageRepo>();
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -70,5 +82,6 @@ app.MapScalarApiReference(options =>
     options.WithOpenApiRoutePattern(
         "/swagger/{documentName}/swagger.json");
 });
-
+app.MapHub<CustomerServiceHub>(
+    "/hubs/customer-service");
 app.Run();
