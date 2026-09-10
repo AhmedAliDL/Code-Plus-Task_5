@@ -8,18 +8,14 @@ namespace ECommerce.Application.Conversation.Commands.CreateConversation
     public class CreateConversationCommandHandler
     : IRequestHandler<CreateConversationCommand, int>
     {
-
         private readonly IChatNotifier _chatNotifier;
-        private readonly IChatMessageRepo _chatRepo;
         private readonly IConversationRepo _convRepo;
 
         public CreateConversationCommandHandler(
-
-            IChatNotifier chatNotifier, IChatMessageRepo chatRepo, IConversationRepo convRepo)
+            IChatNotifier chatNotifier,
+            IConversationRepo convRepo)
         {
-
             _chatNotifier = chatNotifier;
-            _chatRepo = chatRepo;
             _convRepo = convRepo;
         }
 
@@ -29,7 +25,7 @@ namespace ECommerce.Application.Conversation.Commands.CreateConversation
         {
             var conversation = new Domain.Entities.Conversation
             {
-                CustomerId = 1,
+                CustomerId = request.CustomerId,
 
                 Status = ConversationStatus.Waiting,
 
@@ -38,8 +34,6 @@ namespace ECommerce.Application.Conversation.Commands.CreateConversation
 
             await _convRepo.AddConversationAsync(conversation);
 
-
-            // Notify all connected agents
             await _chatNotifier.NotifyNewConversationAsync(
                 new ConversationDto
                 {

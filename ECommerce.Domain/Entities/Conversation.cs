@@ -16,6 +16,8 @@ public class Conversation
 
     public DateTime? ClosedAt { get; set; }
 
+    public Customer Customer { get; set; } = null!;
+
     public ICollection<ChatMessage> Messages { get; set; }
         = new List<ChatMessage>();
 }

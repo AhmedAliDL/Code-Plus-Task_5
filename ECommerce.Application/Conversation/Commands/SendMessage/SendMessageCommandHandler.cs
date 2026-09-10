@@ -7,14 +7,16 @@ using MediatR;
 namespace ECommerce.Application.Conversation.Commands.SendMessage
 {
     public class SendMessageCommandHandler
-    : IRequestHandler<SendMessageCommand, ChatMessageDto>
+     : IRequestHandler<SendMessageCommand, ChatMessageDto>
     {
         private readonly IChatNotifier _chatNotifier;
         private readonly IConversationRepo _convRepo;
         private readonly IChatMessageRepo _chatRepo;
 
         public SendMessageCommandHandler(
-            IChatNotifier chatNotifier, IConversationRepo convRepo, IChatMessageRepo chatRepo)
+            IChatNotifier chatNotifier,
+            IConversationRepo convRepo,
+            IChatMessageRepo chatRepo)
         {
             _chatNotifier = chatNotifier;
             _convRepo = convRepo;
@@ -25,7 +27,9 @@ namespace ECommerce.Application.Conversation.Commands.SendMessage
             SendMessageCommand request,
             CancellationToken cancellationToken)
         {
-            var conversation = await _convRepo.GetByIdAsync(request.ConversationId);
+            var conversation =
+                await _convRepo.GetByIdAsync(
+                    request.ConversationId);
 
             if (conversation is null)
                 throw new KeyNotFoundException(
@@ -35,21 +39,19 @@ namespace ECommerce.Application.Conversation.Commands.SendMessage
                 throw new InvalidOperationException(
                     "Conversation is not active.");
 
-            var userId = 1;
+            var customerId = request.CustomerId;
 
-            if (conversation.CustomerId != userId &&
-                conversation.AgentId != userId)
+            if (conversation.CustomerId != customerId)
             {
                 throw new UnauthorizedAccessException(
-                    "You are not part of this conversation.");
+                    "You are not the customer of this conversation.");
             }
 
             var message = new ChatMessage
             {
-
                 ConversationId = conversation.Id,
 
-                SenderId = userId,
+                SenderId = customerId,
 
                 Content = request.Content,
 
@@ -58,8 +60,8 @@ namespace ECommerce.Application.Conversation.Commands.SendMessage
                 IsRead = false
             };
 
-
             await _chatRepo.AddMessage(message);
+
             var dto = new ChatMessageDto
             {
                 Id = message.Id,
@@ -70,12 +72,12 @@ namespace ECommerce.Application.Conversation.Commands.SendMessage
                 IsRead = message.IsRead
             };
 
-            // Real-time notification
             await _chatNotifier.SendMessageAsync(
                 conversation.Id,
                 dto);
 
             return dto;
         }
+
     }
 }

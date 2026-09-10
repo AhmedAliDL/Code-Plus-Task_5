@@ -2,6 +2,7 @@
 
 namespace ECommerce.Application.Conversation.Commands.CreateConversation
 {
-    public record CreateConversationCommand
-    : IRequest<int>;
+    public record CreateConversationCommand(
+     int CustomerId
+ ) : IRequest<int>;
 }

@@ -4,7 +4,8 @@ using MediatR;
 namespace ECommerce.Application.Conversation.Commands.SendMessage
 {
     public record SendMessageCommand(
-    int ConversationId,
-    string Content
-) : IRequest<ChatMessageDto>;
+        int CustomerId,
+        int ConversationId,
+        string Content
+    ) : IRequest<ChatMessageDto>;
 }
